@@ -8,11 +8,13 @@
 import UIKit
 import Alamofire
 import SwiftyJSON
+import NVActivityIndicatorView
 
 class PostVC: UIViewController {
     
     
     @IBOutlet weak var postTableView: UITableView!
+    @IBOutlet weak var loaderView: NVActivityIndicatorView!
     
     var posts: [Post] = []
 
@@ -20,11 +22,16 @@ class PostVC: UIViewController {
         super.viewDidLoad()
         postTableView.delegate = self
         postTableView.dataSource = self
+        
+        // Noticiation
+        NotificationCenter.default.addObserver(self, selector: #selector(userProfileTapped), name: NSNotification.Name("userStackViewTapped"), object: nil)
         let url = "https://dummyapi.io/data/v1/post"
         let headers: HTTPHeaders = [
             "app-id": "63171e3d8458da831168d2ad"
         ]
+        loaderView.startAnimating()
         AF.request(url, headers: headers).responseJSON { response in
+            self.loaderView.stopAnimating()
             let josnData = JSON(response.value)
             let data = josnData["data"]
             let decoder = JSONDecoder()
@@ -37,8 +44,20 @@ class PostVC: UIViewController {
             
         }
     }
-
-
+    
+        //MARK: - ACTIONS
+    
+    @objc func userProfileTapped(notifiction: Notification){
+        if let cell = notifiction.userInfo?["cell"] as? UITableViewCell {
+            if let indexPath = postTableView.indexPath(for: cell) {
+                let post = posts[indexPath.row]
+                let storyboard: UIStoryboard = UIStoryboard(name: "Profile", bundle: nil)
+                let vc = storyboard.instantiateViewController(withIdentifier: "ProfileUser") as! ProfileUser
+                vc.user = post.owner
+                showDetailViewController(vc, sender: nil)
+            }
+        }
+    }
 }
 
 extension PostVC: UITableViewDelegate, UITableViewDataSource {
@@ -54,24 +73,32 @@ extension PostVC: UITableViewDelegate, UITableViewDataSource {
         cell.postText.text = post.text
         cell.postUserName.text = post.owner.firstName + " " + post.owner.lastName
         // the logic of convert Image user from URL
-        cell.postUserImage.layer.cornerRadius = cell.postUserImage.frame.width / 2
-        if let urlUserImage = URL(string: post.owner.picture){
-            if let imageUserData = try? Data(contentsOf: urlUserImage){
-                cell.postUserImage.image = UIImage(data: imageUserData)
-            }
-        }
+        cell.postUserImage.makeImageCircler()
+        
+        let userImageStringUrl = post.owner.picture
+//        if let urlUserImage = URL(string: userImageStringUrl){
+//            if let imageUserData = try? Data(contentsOf: urlUserImage){
+//                cell.postUserImage.image = UIImage(data: imageUserData)
+//            }
+//        }
+        cell.postUserImage.setImageFromStringUrl(stringUrl: userImageStringUrl)
         // the logic of convert Image post from URL
-        if let url = URL(string: post.image) {
-            if let imageData = try? Data(contentsOf: url){
-                cell.postImage.image = UIImage(data: imageData)
-            }
-        }
+        let postImageStringUrl = post.image
+//        if let url = URL(string: postImageStringUrl) {
+//            if let imageData = try? Data(contentsOf: url){
+//                cell.postImage.image = UIImage(data: imageData)
+//            }
+//        }
+        cell.postImage.setImageFromStringUrl(stringUrl: postImageStringUrl)
         cell.postLikes.text = "\(post.likes)"
         
         return cell
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 433
+        return 470
+        
+        
+        
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

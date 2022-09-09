@@ -8,6 +8,7 @@
 import UIKit
 import Alamofire
 import SwiftyJSON
+import NVActivityIndicatorView
 
 class PostDetailVC: UIViewController {
 
@@ -15,21 +16,14 @@ class PostDetailVC: UIViewController {
     var comment: [Comment] = []
     
     //MARK: - OUTLETS
+    @IBOutlet weak var LoaderView: NVActivityIndicatorView!
     @IBOutlet weak var commentTableView: UITableView!
     @IBOutlet weak var imageUser: UIImageView!
     @IBOutlet weak var nameUser: UILabel!
     @IBOutlet weak var postTextLable: UILabel!
     @IBOutlet weak var postImage: UIImageView!
     @IBOutlet weak var postLikes: UILabel!
-    @IBOutlet weak var backView: UIView!{
-        didSet{
-            backView.layer.shadowColor = UIColor.gray.cgColor
-            backView.layer.shadowOpacity = 0.4
-            backView.layer.shadowOffset = CGSize(width: 0, height: 10)
-            backView.layer.shadowRadius = 10
-            backView.layer.cornerRadius = 5
-        }
-    }
+    
     
     
     
@@ -42,7 +36,9 @@ class PostDetailVC: UIViewController {
         let headers: HTTPHeaders = [
             "app-id": "63171e3d8458da831168d2ad"
         ]
+        LoaderView.startAnimating()
         AF.request(url, headers: headers).responseJSON { response in
+            self.LoaderView.stopAnimating()
             let josnData = JSON(response.value)
             let data = josnData["data"]
             let decoder = JSONDecoder()
@@ -50,7 +46,7 @@ class PostDetailVC: UIViewController {
                 self.comment = try decoder.decode([Comment].self, from: data.rawData())
                 self.commentTableView.reloadData()
             }catch let error {
-                print(data)
+                print(error)
             }
         
 
@@ -58,6 +54,9 @@ class PostDetailVC: UIViewController {
         nameUser.text = post.owner.firstName + " " + post.owner.lastName
         postTextLable.text = post.text
         postLikes.text = String(post.likes)
+        imageUser.setImageFromStringUrl(stringUrl: post.owner.picture)
+        imageUser.makeImageCircler()
+        postImage.setImageFromStringUrl(stringUrl: post.image)
     }
     
     @IBAction func backToPsats(_ sender: UIButton) {
@@ -74,9 +73,23 @@ extension PostDetailVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CommentCell") as! CommentCell
+        let currentComment = comment[indexPath.row]
+        cell.commentMessageLabel.text = currentComment.message
+        cell.commentUserName.text = currentComment.owner.firstName + " " + currentComment.owner.lastName
+        // the logic of convert Image user from URL
+        let commentUserImageUrl = currentComment.owner.picture
+        cell.commentUserImage.setImageFromStringUrl(stringUrl: commentUserImageUrl)
+        cell.commentUserImage.makeImageCircler()
+//        if let url = URL(string: currentComment.owner.picture) {
+//            if let imageData = try? Data(contentsOf: url) {
+//                cell.commentUserImage.image = UIImage(data: imageData)
+//            }
+//        }
         
-        cell.commentMessageLabel.text = comment[indexPath.row].message
         return cell
+    }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 104
     }
     
     

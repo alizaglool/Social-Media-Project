@@ -16,9 +16,4 @@ struct Post: Decodable {
     var owner: User
 }
 
-struct User: Decodable {
-    var id: String
-    var firstName: String
-    var lastName: String
-    var picture: String
-}
+
