@@ -16,6 +16,7 @@ class PostDetailVC: UIViewController {
     var comment: [Comment] = []
     
     //MARK: - OUTLETS
+    @IBOutlet weak var sendCommentSV: UIStackView!
     @IBOutlet weak var LoaderView: NVActivityIndicatorView!
     @IBOutlet weak var commentTableView: UITableView!
     @IBOutlet weak var imageUser: UIImageView!
@@ -23,6 +24,7 @@ class PostDetailVC: UIViewController {
     @IBOutlet weak var postTextLable: UILabel!
     @IBOutlet weak var postImage: UIImageView!
     @IBOutlet weak var postLikes: UILabel!
+    @IBOutlet weak var commentTF: UITextField!
     
     
     
@@ -30,40 +32,59 @@ class PostDetailVC: UIViewController {
     //MARK: - LIFE CYCLE METHODS
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if UserManager.logedInUser == nil {
+            sendCommentSV.isHidden = true
+        }
+        
         commentTableView.dataSource = self
         commentTableView.delegate = self
-        let url = "https://dummyapi.io/data/v1/post/\(post.id)/comment"
-        let headers: HTTPHeaders = [
-            "app-id": "63171e3d8458da831168d2ad"
-        ]
-        LoaderView.startAnimating()
-        AF.request(url, headers: headers).responseJSON { response in
-            self.LoaderView.stopAnimating()
-            let josnData = JSON(response.value)
-            let data = josnData["data"]
-            let decoder = JSONDecoder()
-            do {
-                self.comment = try decoder.decode([Comment].self, from: data.rawData())
-                self.commentTableView.reloadData()
-            }catch let error {
-                print(error)
-            }
-        
+        setupUI()
+       
+        getComments()
 
+    }
+    
+    func getComments(){
+        LoaderView.startAnimating()
+        PostAPI.getCommentsOfPost(id: post.id) { commentResponce in
+            self.comment = commentResponce
+            self.commentTableView.reloadData()
+            self.LoaderView.stopAnimating()
         }
+    }
+    
+    func setupUI(){
         nameUser.text = post.owner.firstName + " " + post.owner.lastName
         postTextLable.text = post.text
         postLikes.text = String(post.likes)
-        imageUser.setImageFromStringUrl(stringUrl: post.owner.picture)
+        if let image = post.owner.picture {
+            imageUser.setImageFromStringUrl(stringUrl: image)
+        }
+        
         imageUser.makeImageCircler()
-        postImage.setImageFromStringUrl(stringUrl: post.image)
+        if let image = post.image {
+            postImage.setImageFromStringUrl(stringUrl: image)
+
+        }
     }
-    
     @IBAction func backToPsats(_ sender: UIButton) {
         self.dismiss(animated: true, completion: nil)
     }
     
-   
+    @IBAction func createCommentToPost(_ sender: Any) {
+        
+        let message = commentTF.text!
+        if let user = UserManager.logedInUser {
+            PostAPI.creatCommenttoPost(postId: post.id, ownerId: user.id, message: message) {
+                self.LoaderView.startAnimating()
+                self.getComments()
+                self.commentTF.text = ""
+            }
+        }
+       
+    }
+    
 
 }
 extension PostDetailVC: UITableViewDelegate, UITableViewDataSource {
@@ -78,7 +99,9 @@ extension PostDetailVC: UITableViewDelegate, UITableViewDataSource {
         cell.commentUserName.text = currentComment.owner.firstName + " " + currentComment.owner.lastName
         // the logic of convert Image user from URL
         let commentUserImageUrl = currentComment.owner.picture
-        cell.commentUserImage.setImageFromStringUrl(stringUrl: commentUserImageUrl)
+        if let userImage = commentUserImageUrl {
+            cell.commentUserImage.setImageFromStringUrl(stringUrl: userImage)
+        }
         cell.commentUserImage.makeImageCircler()
 //        if let url = URL(string: currentComment.owner.picture) {
 //            if let imageData = try? Data(contentsOf: url) {

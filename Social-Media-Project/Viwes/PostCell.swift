@@ -15,11 +15,19 @@ class PostCell: UITableViewCell {
             userStackView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(userStackViewTapped)))
         }
     }
+    @IBOutlet weak var postTagsCollectionView: UICollectionView!{
+        didSet{
+            postTagsCollectionView.delegate = self
+            postTagsCollectionView.dataSource = self
+        }
+    }
     @IBOutlet weak var postLikes: UILabel!
     @IBOutlet weak var postText: UILabel!
     @IBOutlet weak var postImage: UIImageView!
     @IBOutlet weak var postUserName: UILabel!
     @IBOutlet weak var postUserImage: UIImageView!
+    
+    var tags: [String] = []
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -38,4 +46,20 @@ class PostCell: UITableViewCell {
         NotificationCenter.default.post(name: NSNotification.Name("userStackViewTapped"), object: nil, userInfo: ["cell": self])
     }
 
+}
+
+extension PostCell: UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return tags.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PostTageCell", for: indexPath) as! PostTagsCell
+        
+        cell.postTageNamelbl.text = tags[indexPath.row]
+        return cell
+    }
+    
+    
 }

@@ -10,10 +10,13 @@ import UIKit
 
 struct Post: Decodable {
     var id: String
-    var image: String
+    var image: String?
     var likes: Int
     var text: String
+    var tags: [String]?
     var owner: User
 }
 
-
+//struct Tags: Decodable {
+//    let data: [String]
+//}

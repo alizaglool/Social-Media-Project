@@ -10,11 +10,17 @@ import UIKit
 
 extension UIImageView {
     func setImageFromStringUrl(stringUrl: String){
-        if let url = URL(string: stringUrl) {
-            if let imageData = try? Data(contentsOf: url){
-                self.image = UIImage(data: imageData)
+        
+        DispatchQueue.global().async {
+            if let url = URL(string: stringUrl) {
+                if let imageData = try? Data(contentsOf: url){
+                    DispatchQueue.main.async {
+                        self.image = UIImage(data: imageData)
+                    }
+                }
             }
         }
+        
     }
     
     func makeImageCircler(){
