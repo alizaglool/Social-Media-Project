@@ -80,11 +80,21 @@ class PostDetailVC: UIViewController {
                 self.LoaderView.startAnimating()
                 self.getComments()
                 self.commentTF.text = ""
-            }
+//            PostAPI.testCommenttoPost(url: .createComment, pramers: [
+//                "post": postId,
+//                "owner": ownerId,
+//                "message": message
+//            ], method: .post) {
+//                                self.LoaderView.startAnimating()
+//                                self.getComments()
+//                                self.commentTF.text = ""
+//            }
+//            }
         }
        
-    }
     
+        }
+    }
 
 }
 extension PostDetailVC: UITableViewDelegate, UITableViewDataSource {

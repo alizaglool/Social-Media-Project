@@ -8,6 +8,12 @@
 import Foundation
 import Alamofire
 
+enum EndPoint: String {
+   
+    case createComment = "/comment/create"
+}
+
+
 class API {
     
     static let baseURL = "https://dummyapi.io/data/v1"

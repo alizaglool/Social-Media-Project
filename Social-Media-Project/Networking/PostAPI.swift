@@ -113,5 +113,19 @@ class PostAPI: API {
 //            
 //        }
 //    }
+//    static func testCommenttoPost(url: EndPoint ,pramers: [String: String],method: HTTPMethod, complitionHander: @escaping () -> () ) {
+//        
+//        let URL = "\(baseURL)/\(url.rawValue)"
+//        
+//        AF.request(URL, method: method , parameters: pramers, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
+//            switch response.result {
+//            case .success:
+//                    complitionHander()
+//            case .failure(let error):
+//                print(error)
+//            }
+//           
+//        }
+//    }
 }
 //Zaghloul24172405ali@

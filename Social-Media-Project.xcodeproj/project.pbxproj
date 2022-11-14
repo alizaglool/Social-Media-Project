@@ -126,9 +126,9 @@
 		7351850D28C74DC6008D96FE /* Social-Media-Project */ = {
 			isa = PBXGroup;
 			children = (
-				73F5A69A28CE0776000CF001 /* Networking */,
 				7351850E28C74DC6008D96FE /* AppDelegate.swift */,
 				7351851028C74DC6008D96FE /* SceneDelegate.swift */,
+				73F5A69A28CE0776000CF001 /* Networking */,
 				73A6F08728C8E50100D89036 /* Helper */,
 				73EA3E4728C7A1A600FA5BBF /* Models */,
 				73EA3E4628C7A19600FA5BBF /* Viwes */,
